@@ -182,6 +182,27 @@ msgstr "المشروع أو النسخة الاحتياطية للمشروع غ�
 msgid "Continue (yes/no)? "
 msgstr "أترغب بالاستمرار (نعم/لا)؟ "
 
+msgid "Select who the new project belongs to:\n"
+msgstr "اختر الجهة التي سيتبع لها المشروع الجديد:\n"
+
+msgid "Personal project"
+msgstr "مشروع شخصي"
+
+msgid "Enter the selected number:\n"
+msgstr "أدخل الرقم المختار:\n"
+
+msgid "No existing project found with the same name. "
+"A new project will be created under the organization `%s`. "
+"Its usage will be billed to the organization.\n"
+msgstr "لا يوجد مشروع بهذا الاسم. سيُنشأ مشروع جديد تابع للمؤسسة `%s`، وستُحتسب تكلفة استخدامه على المؤسسة.\n"
+
+msgid "Continue? (Type `yes` to proceed, `no` to cancel, "
+"or `plan` to change the hosting plan) "
+msgstr "أترغب بالاستمرار؟ (أدخل `نعم` للاستمرار أو `لا` للإلغاء أو `باقة` لاختيار باقة الاستضافة) "
+
+msgid "The selected organization was not found, or you are no longer a member of it.\n"
+msgstr "لم يُعثر على المؤسسة المختارة، أو أنك لم تعد عضوًا فيها.\n"
+
 msgid "Current hosting plan:\n"
 msgstr "باقة الاستضافة الحالية:\n"
 
