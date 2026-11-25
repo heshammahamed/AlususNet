@@ -161,14 +161,15 @@
 
         handler this.changePlanById(planId: String, promotionCode: String) {
             while 1 {
-                def request: Net.Request(host + CHANGE_PLAN_PATH);
+                def request: Net.Request(String.format(
+                    "%s%s?project=%s", host.buf, CHANGE_PLAN_PATH, Net.uriEncode(this.projectName).buf
+                ));
                 request.verbose = this.verbose;
                 request.authType = "Bearer";
                 request.authKey = this.apiKey;
                 request.contentType = "application/json";
                 request.post(String.format(
-                    "{\"projectName\": \"%s\", \"planId\": \"%s\", \"promotionCode\": \"%s\"}",
-                    Json.escape(this.projectName).buf,
+                    "{\"planId\": \"%s\", \"promotionCode\": \"%s\"}",
                     Json.escape(planId).buf,
                     Json.escape(promotionCode).buf
                 ));
