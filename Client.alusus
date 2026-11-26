@@ -114,6 +114,7 @@
             if checkProjectName(this.projectName) {
                 this.fetchPlans();
                 this.fetchApiToken();
+                this.selectOrganization();
                 this.setupProject();
                 this.uploadProject(serverPort, projectPath, starter);
             } else {
@@ -126,11 +127,13 @@
 
         handler this.restoreDbBackup(restore_db_path: String) {
             this.fetchApiToken();
+            this.selectOrganization();
             this.uploadBackup(restore_db_path);
         }
 
         handler this.downloadDbBackup(backup_db_path: String) {
             this.fetchApiToken();
+            this.selectOrganization();
             this.downloadBackup(backup_db_path);
         }
 
@@ -150,6 +153,7 @@
 
         handler this.changePlan(planName: String, promotionCode: String) {
             this.fetchApiToken();
+            this.selectOrganization();
             this.fetchPlans();
             def plan: Json = this.findPlanByName(planName);
             if plan.getLength() == 0 {
@@ -162,7 +166,8 @@
         handler this.changePlanById(planId: String, promotionCode: String) {
             while 1 {
                 def request: Net.Request(String.format(
-                    "%s%s?project=%s", host.buf, CHANGE_PLAN_PATH, Net.uriEncode(this.projectName).buf
+                    "%s%s?projectName=%s&organizationId=%s", host.buf, CHANGE_PLAN_PATH,
+                    Net.uriEncode(this.projectName).buf, Net.uriEncode(this.organizationId).buf
                 ));
                 request.verbose = this.verbose;
                 request.authType = "Bearer";
@@ -434,7 +439,8 @@
             def planId: String;
             while 1 {
                 def request: Net.Request(String.format(
-                    "%s%s?project=%s", host.buf, GET_PROJECT_STATUS_PATH, Net.uriEncode(this.projectName).buf
+                    "%s%s?projectName=%s&organizationId=%s", host.buf, GET_PROJECT_STATUS_PATH,
+                    Net.uriEncode(this.projectName).buf, Net.uriEncode(this.organizationId).buf
                 ));
                 request.verbose = this.verbose;
                 request.authType = "Bearer";
@@ -450,6 +456,12 @@
                     System.fail(1, i18nOut("Project name is not valid.\n"));
                 } else if request.responseHttpStatus == 401 {
                     handle401Error[];
+                } else if request.responseHttpStatus == 403
+                    and request.responseBody == "organization_action_not_authorized" {
+                    System.fail(1, i18nOut(
+                        "The organization already has a project with this name, and you are not authorized "
+                        "to overwrite it. Choose another name.\n"
+                    ));
                 } else {
                     handleUnexpectedCommunicationError[];
                 }
@@ -471,7 +483,6 @@
                 plan = this.plans(0);
             }
             def planId: String = plan("id");
-            this.selectOrganization();
             // An organization project is billed to the organization, so it has no payment plan or promotion code.
             def isOrganizationProject: Bool = this.organizationId != "";
             if isOrganizationProject {
@@ -653,7 +664,7 @@
         handler this.performProjectSetup(planId: String, promotionCode: String) {
             while 1 {
                 def request: Net.Request(String.format(
-                    "%s%s?project=%s&plan=%s&promotion_code=%s&organization=%s",
+                    "%s%s?projectName=%s&plan=%s&promotion_code=%s&organizationId=%s",
                     host.buf, SETUP_PROJECT_PATH,
                     Net.uriEncode(this.projectName).buf,
                     Net.uriEncode(planId).buf,
@@ -698,6 +709,13 @@
                     System.fail(1, i18nOut(
                         "The selected organization was not found, or you are no longer a member of it.\n"
                     ));
+                } else if request.responseHttpStatus == 409 and request.responseBody == "project_name_taken" {
+                    System.fail(1, i18nOut("You already have a project with this name. Choose another name.\n"));
+                } else if request.responseHttpStatus == 409
+                    and request.responseBody == "organization_project_name_taken" {
+                    System.fail(1, i18nOut(
+                        "The organization already has a project with this name. Choose another name.\n"
+                    ));
                 } else if request.responseHttpStatus == 401 {
                     handle401Error[];
                 } else {
@@ -741,8 +759,8 @@
                         System.exit(1);
                     }
                     def request: Net.Request(String.format(
-                        "%s%s?project=%s&port=%i&start=%s", host.buf, UPLOAD_PROJECT_PATH,
-                        Net.uriEncode(this.projectName).buf, serverPort,
+                        "%s%s?projectName=%s&organizationId=%s&port=%i&start=%s", host.buf, UPLOAD_PROJECT_PATH,
+                        Net.uriEncode(this.projectName).buf, Net.uriEncode(this.organizationId).buf, serverPort,
                         Net.uriEncode(starter).buf
                     ));
                     request.verbose = this.verbose;
@@ -804,8 +822,8 @@
                         System.exit(1);
                     }
                     def request: Net.Request(String.format(
-                        "%s%s?project=%s", host.buf, UPLOAD_BACKUP_PATH,
-                        Net.uriEncode(this.projectName).buf
+                        "%s%s?projectName=%s&organizationId=%s", host.buf, UPLOAD_BACKUP_PATH,
+                        Net.uriEncode(this.projectName).buf, Net.uriEncode(this.organizationId).buf
                     ));
                     request.verbose = this.verbose;
                     request.authKey = this.apiKey;
@@ -856,8 +874,8 @@
             def backupName: String = "";
             while 1 {
                 def request: Net.Request(String.format(
-                    "%s%s?project=%s&backup_type=database", host.buf, CREATE_BACKUP_PATH,
-                    Net.uriEncode(this.projectName).buf
+                    "%s%s?projectName=%s&organizationId=%s&backup_type=database", host.buf, CREATE_BACKUP_PATH,
+                    Net.uriEncode(this.projectName).buf, Net.uriEncode(this.organizationId).buf
                 ));
                 request.verbose = this.verbose;
                 request.authType = "Bearer";
@@ -892,8 +910,8 @@
         handler this.isBackupReady(backupName: String): bool {
             while 1 {
                 def request: Net.Request(String.format(
-                    "%s%s?project=%s&backup=%s", host.buf, CHECK_BACKUP_STATUS,
-                    Net.uriEncode(this.projectName).buf,
+                    "%s%s?projectName=%s&organizationId=%s&backup=%s", host.buf, CHECK_BACKUP_STATUS,
+                    Net.uriEncode(this.projectName).buf, Net.uriEncode(this.organizationId).buf,
                     Net.uriEncode(backupName).buf
                 ));
                 request.verbose = this.verbose;
@@ -907,7 +925,7 @@
                     if status == String("creating") {
                         Console.print(i18nOut("Backup is not created yet!\n"));
                         // for 5 sec
-                        System.usleep(5000000);
+                        System.sleep(5000000);
                         Console.print(i18nOut("Waiting!\n"));
                     } else if status == String("creating_failed") {
                         Console.print(i18nOut("Backup creation field\n"));
@@ -961,14 +979,15 @@
             return Json();
         }
 
-        // Lets the user choose between a personal project and a project under one of organizations he is in.
+        // Lets the user choose between a personal project and a project under one of the organizations they're
+        // in. Project names are only unique within that choice, so it comes before any request about the project.
         // The question is skipped when the user is not a member of any organization.
         handler this.selectOrganization() {
             this.organizationId.clear();
             this.organizationName.clear();
             def organizations: Json = this.fetchOrganizations();
             if organizations.getLength() == 0 return;
-            Console.print(i18nOut("Select who the new project belongs to:\n"));
+            Console.print(i18nOut("Select who the project belongs to:\n"));
             def options: Map[String, String];
             Console.print(
                 "\n%s%d%s: %s", Console.Style.FG_GREEN, 1, Console.Style.RESET, i18nOut("Personal project").buf

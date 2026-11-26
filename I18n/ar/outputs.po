@@ -182,8 +182,8 @@ msgstr "المشروع أو النسخة الاحتياطية للمشروع غ�
 msgid "Continue (yes/no)? "
 msgstr "أترغب بالاستمرار (نعم/لا)؟ "
 
-msgid "Select who the new project belongs to:\n"
-msgstr "اختر الجهة التي سيتبع لها المشروع الجديد:\n"
+msgid "Select who the project belongs to:\n"
+msgstr "اختر الجهة التي يتبع لها المشروع:\n"
 
 msgid "Personal project"
 msgstr "مشروع شخصي"
@@ -202,6 +202,15 @@ msgstr "أترغب بالاستمرار؟ (أدخل `نعم` للاستمرار 
 
 msgid "The selected organization was not found, or you are no longer a member of it.\n"
 msgstr "لم يُعثر على المؤسسة المختارة، أو أنك لم تعد عضوًا فيها.\n"
+
+msgid "You already have a project with this name. Choose another name.\n"
+msgstr "لديك مشروع بهذا الاسم مسبقًا. اختر اسمًا آخر.\n"
+
+msgid "The organization already has a project with this name. Choose another name.\n"
+msgstr "لدى المؤسسة مشروع بهذا الاسم مسبقًا. اختر اسمًا آخر.\n"
+
+msgid "The organization already has a project with this name, and you are not authorized to overwrite it. Choose another name.\n"
+msgstr "لدى المؤسسة مشروع بهذا الاسم مسبقًا، وليست لديك صلاحية استبداله. اختر اسمًا آخر.\n"
 
 msgid "Current hosting plan:\n"
 msgstr "باقة الاستضافة الحالية:\n"
